@@ -56,9 +56,7 @@ def transform(gcpath: Path) -> pd.DataFrame:
     
     print('***** Finding null data *****')
     print(df.isnull().sum(axis=0))
-    print(f'length of downloaded data: {len(df)}')    
-    if os.path.exists(gcpath):
-      os.rmdir(gcpath)
+    print(f'length of downloaded data: {len(df)}')
     
     return df
 
