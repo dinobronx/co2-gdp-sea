@@ -1,0 +1,17 @@
+version: 2
+
+models:
+  - name: fact_gdp_real
+    description: table for chosen south east asian countries with real gdp in $ for the last 10 years
+  - name: fact_gdp_per_capita
+    description: table for chosen south east asian countries with gdp per capita for the last 10 years
+  - name: fact_gdp_growth
+    description: table for chosen south east asian countries with gdp growth for the last 10 years
+  - name: fact_netmigration
+    description: table for net migration in 2020
+  - name: fact_total_population
+    description: table on total population of chosen south east asian countries for the last 10 years
+  - name: fact_unemployment
+    description: table on unemployment rate of chosen south east asian countries for the last 10 years
+  - name: fact_carbon_emissions
+    description: table on co2 emissions in kt of chosen south east asian countries for the last 10 yeras

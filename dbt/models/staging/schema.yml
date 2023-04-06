@@ -1,0 +1,24 @@
+version: 2
+
+sources:
+  - name: staging
+    database: alien-handler-376020
+    schema: sea_economic_analysis
+
+    tables:
+      - name: rawdata
+
+models:
+  - name: stg_sea_analysis
+    description: >
+      Data downloaded from the World Bank. It includes indicator on economic health and co2 emission.
+      The data is filtered by the top 5 countries in south east asia with highest gdp
+    columns:
+      - name: country
+        description: name of the country
+      - name: country_code
+        description: code of the country, ex VNM for Vietnam
+      - name: econ_indicator
+        description: a metric of the country ex. gdp, unemployment
+      - name: year
+      - name: value
