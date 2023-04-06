@@ -7,8 +7,12 @@ This is a data pipeline to download data from World Bank using its World Develop
 The data pipeline can serve as a template to analyse different World Development Indicators for different countries. 
 
 
-Prefect is used to orchestrate the pipeline. 
-`python etl/mainflow.py` 
+Prefect is used to orchestrate the pipeline.
+
+```shell
+python etl/mainflow.py
+```
+
 It starts with downloading data from world bank data bank, uploads the raw data to google cloud. Then data is filtered with the indicators, countries and years that are of interests, and gets uploaded to big query. DBT is used to further model the data to prepare for report and analysis.
 
 ![archdata](archdata.jpg)
@@ -25,14 +29,16 @@ Dashboard - https://lookerstudio.google.com/u/0/reporting/58cd5b1a-440d-4055-b55
 1. [Google Cloud Platform account](https://console.cloud.google.com/)
 2. gcp project
 3. [gcp credential](https://developers.google.com/workspace/guides/create-credentials)
-4. [Terraform] (https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli)
+4. [Terraform](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli)
 5. Python 3.9 or above
 
 ### Set up
 
 1. After installing python, install dependencies:
     on the project directory run:
-    `pip install -r requirements.txt`
+    ```shell
+    pip install -r requirements.txt
+    ```
 
 2. Populate config.json, 
     "project_id" is your gcp project
@@ -45,13 +51,16 @@ Dashboard - https://lookerstudio.google.com/u/0/reporting/58cd5b1a-440d-4055-b55
 
 ### Run the project
 1. Create resources with terraform
+    ```shell
+    terraform init
     
-    `terraform init`
-    
-    `terraform apply`
+    terraform apply
+    ```
 
 2. Run the pipeline
-    `python etl/mainflow.py`
+    ```shell
+    python etl/mainflow.py
+    ```
 
 
 
@@ -59,6 +68,8 @@ After this, you can now start your [data modeling with dbt](https://docs.getdbt.
 
 To destroy resources in google cloud:
 
-`terraform destroy`
+```shell
+terraform destroy
+```
 
 
