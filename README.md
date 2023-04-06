@@ -41,26 +41,26 @@ Dashboard - https://lookerstudio.google.com/u/0/reporting/58cd5b1a-440d-4055-b55
     ```
 
 2. Populate config.json, 
-    "project_id" is your gcp project
-    "region" is which [google cloud region](https://cloud.google.com/about/locations#americas) you want to deploy your resources  
-    "storage_class" - for your gcp [bucket](https://cloud.google.com/storage/docs/storage-classes)
-    "secret_path" - location of google cloud credentials json file. 
-    "data_lake_bucket" - what you want to name your bucket
-    "bq_dataset" - what you want to name your big query data set
-    "bq_ds_for_dbt" - what you want to name another data set for big query to communicate with dbt
+    - "project_id" is your gcp project
+    - "region" is which [google cloud region](https://cloud.google.com/about/locations#americas) you want to deploy your resources  
+    - "storage_class" - for your gcp [bucket](https://cloud.google.com/storage/docs/storage-classes)
+    - "secret_path" - location of google cloud credentials json file. 
+    - "data_lake_bucket" - what you want to name your bucket
+    - "bq_dataset" - what you want to name your big query data set
+    - "bq_ds_for_dbt" - what you want to name another data set for big query to communicate with dbt
 
 ### Run the project
 1. Create resources with terraform
-    ```shell
-    terraform init
-    
-    terraform apply
-    ```
+```shell
+terraform init
+
+terraform apply
+```
 
 2. Run the pipeline
-    ```shell
-    python etl/mainflow.py
-    ```
+```shell
+python etl/mainflow.py
+```
 
 
 
