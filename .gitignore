@@ -1,3 +1,6 @@
 temp/
 secrets/de-proj.json
 .ipynb_checkpoints
+.terraform*
+terraform.tfstate
+terraform.tfstate.backup

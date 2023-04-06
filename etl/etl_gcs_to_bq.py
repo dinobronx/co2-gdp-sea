@@ -1,16 +1,11 @@
 from pathlib import Path
 import pandas as pd
+import json
 import os
 from prefect import flow, task
 from prefect_gcp.cloud_storage import GcsBucket
 from prefect_gcp import GcpCredentials
 
-gcs_file = 'economic-analysis.parquet'
-temp_path = 'temp'
-@task()
-def prep_temp():
-    if not os.path.exists(temp_path):
-        os.makedirs(temp_path)
 
 @task()
 def extract_from_gcs() -> Path:
@@ -42,6 +37,7 @@ def clean_econ_indicator(indicator: str) -> str:
     elif indicator == 'Unemployment, total (% of total labor force) (national estimate)':
         return 'unemployment_rate'
     return None
+
 @task()
 def transform(gcpath: Path) -> pd.DataFrame:
     """ Data cleaning sample """
@@ -54,21 +50,21 @@ def transform(gcpath: Path) -> pd.DataFrame:
                        'Year': 'year', 
                        'Value': 'value'}, inplace=True)
     # make sure we have no nulls
-    
+    df['year'] = df['year'].astype(int)
     df['econ_indicator'] = df['econ_indicator'].apply(clean_econ_indicator)
     
     print('***** Finding null data *****')
     print(df.isnull().sum(axis=0))
-    print(f'length of downloaded data: {len(df)}')
-    # if os.path.exists(gcpath):
-    #   os.rmdir(gcpath)
+    print(f'length of downloaded data: {len(df)}')    
+    if os.path.exists(gcpath):
+      os.rmdir(gcpath)
     
     return df
 
 @task()
 def write_bq(df: pd.DataFrame) -> None:
     """ Write data in Big Query """
-    gcp_credentials = GcpCredentials.load("zoom-gcp-creds")
+    gcp_credentials = GcpCredentials.load("econ-gcs-creds")
     schema = [
         {'name':'country', 'type': 'STRING'},
         {'name':'country_code', 'type': 'STRING'},
@@ -76,20 +72,20 @@ def write_bq(df: pd.DataFrame) -> None:
         {'name':'year', 'type': 'INTEGER'},
         {'name':'value', 'type': 'FLOAT64'}
     ]
-    df.to_gbq(
-        destination_table='sea_economic_analysis.rawdata',
-        project_id='alien-handler-376020',
-        credentials=gcp_credentials.get_credentials_from_service_account(),
-        chunksize=500_000,
-        if_exists="replace",
-        table_schema=schema
-    )
-    
+    with open('config.json') as c:
+        config = json.load(c)
+        df.to_gbq(
+            destination_table=f'{config["bq_dataset"]}.rawdata',
+            project_id='alien-handler-376020',
+            credentials=gcp_credentials.get_credentials_from_service_account(),
+            chunksize=500_000,
+            if_exists="replace",
+            table_schema=schema
+        )
 
 @flow()
 def etl_gcs_to_bq() -> None:
     """ Main etl flow to load data to Big Query"""
-    prep_temp()
     gcpath = extract_from_gcs()
     df = transform(gcpath)
     write_bq(df)

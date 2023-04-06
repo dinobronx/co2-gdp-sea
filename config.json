@@ -1,0 +1,9 @@
+{
+    "project_id": "alien-handler-376020",
+    "region": "us-east5",
+    "storage_class": "STANDARD",
+    "secret_path": "secrets/de-proj.json",
+    "data_lake_bucket": "de-proj-sea-econ",
+    "bq_dataset": "sea_economic_analysis_bq",
+    "bq_ds_for_dbt": "sea_economic_analysis_dbt"
+}

@@ -6,28 +6,13 @@ import shutil
 import os
 from prefect import flow, task
 from prefect_gcp.cloud_storage import GcsBucket
-from prefect_gcp import GcpCredentials
 
-# constant
-temp_path = 'temp'
-zip_file = f'{temp_path}/wdi.zip'
-file_to_extract = 'WDIData.csv'
-outfile = f'{temp_path}/economic-analysis.parquet'
-bucketpath = 'de-zoomcamp/economic-analysis.parquet'
-# can be different
-indicators = [
-    'CO2 emissions (kt)',
-    'GDP (current US$)',
-    'GDP growth (annual %)',
-    'GDP per capita (current US$)',
-    'Population ages 0-14 (% of total population)',
-    'Population ages 15-64 (% of total population)',
-    'Population ages 65 and above (% of total population)',
-    'Population, total',
-    'Unemployment, total (% of total labor force) (national estimate)',
-    'Net migration'
-]
-countries = ['Indonesia', 'Vietnam', 'Philippines', 'Singapore', 'Thailand']
+
+TEMP_PATH = 'temp'
+ZIP_FILE = f'{TEMP_PATH}/wdi.zip'
+FILE_TO_EXTRACT = 'WDIData.csv'
+OUTFILE = f'{TEMP_PATH}/economic-analysis.parquet'
+BUCKET_PATH = 'de-zoomcamp/economic-analysis.parquet'
 
 
 @task()
@@ -40,16 +25,16 @@ def prep_temp():
 def download_world_data(dataset_url: str):
     """Downloads world data zip folder"""
     response = requests.get(dataset_url)
-    with open(zip_file, 'wb') as f:
+    with open(ZIP_FILE, 'wb') as f:
         f.write(response.content)
     
 @task()
 def extract() -> pd.DataFrame:
     """Extracts downloaded zip file and reads into a dataframe"""
-    with zipfile.ZipFile(zip_file, 'r') as zip_ref:
-        zip_ref.extract(file_to_extract)
-    shutil.move(file_to_extract, f'{temp_path}/{file_to_extract}')
-    df = pd.read_csv(f'{temp_path}/{file_to_extract}')
+    with zipfile.ZipFile(ZIP_FILE, 'r') as zip_ref:
+        zip_ref.extract(FILE_TO_EXTRACT)
+    shutil.move(FILE_TO_EXTRACT, f'{TEMP_PATH}/{FILE_TO_EXTRACT}')
+    df = pd.read_csv(f'{TEMP_PATH}/{FILE_TO_EXTRACT}')
     return df
     
     
@@ -94,9 +79,9 @@ def transform(df: pd.DataFrame) -> pd.DataFrame:
     return transformed_df
 
 @task()
-def write_local(df: pd.DataFrame, outfile) -> Path:
+def write_local(df: pd.DataFrame, OUTFILE) -> Path:
     """Write DataFrame out as parquet file"""
-    pathdf = Path(outfile)
+    pathdf = Path(OUTFILE)
     df.to_parquet(pathdf, compression="gzip")
     return pathdf
 
@@ -107,7 +92,7 @@ def write_gcs(pathdf: Path) -> None:
     gcs_block = GcsBucket.load("econ-bucket-creds")
     gcs_block.upload_from_path(
         from_path=pathdf,
-        to_path=Path(bucketpath)
+        to_path=Path(BUCKET_PATH)
     )
     return
 
@@ -118,20 +103,36 @@ def cleanup():
     shutil.rmtree('temp')
 
 @flow()
-def etl_web_to_gcs() -> None:
+def etl_web_to_gcs(indicators: list[str], countries: list[str], lastXYears: int) -> None:
     """The main ETL function"""
     prep_temp()
     dataset_url = 'https://databank.worldbank.org/data/download/WDI_CSV.zip'
     download_world_data(dataset_url)
     raw_df = extract()
-    filtered_df = filter(raw_df, indicators=indicators, countries=countries, lastXYears=10)
+    filtered_df = filter(raw_df, indicators=indicators, countries=countries, lastXYears=lastXYears)
     clean_df = clean(filtered_df)
     transformed = transform(clean_df)
-    pathdf = write_local(transformed, outfile=outfile)
+    pathdf = write_local(transformed, OUTFILE=OUTFILE)
     write_gcs(pathdf=pathdf)
     cleanup()
+
 if __name__ == '__main__':
-    etl_web_to_gcs()
+    
+    indicators = [
+        'CO2 emissions (kt)',
+        'GDP (current US$)',
+        'GDP growth (annual %)',
+        'GDP per capita (current US$)',
+        'Population ages 0-14 (% of total population)',
+        'Population ages 15-64 (% of total population)',
+        'Population ages 65 and above (% of total population)',
+        'Population, total',
+        'Unemployment, total (% of total labor force) (national estimate)',
+        'Net migration'
+    ]
+    countries = ['Indonesia', 'Vietnam', 'Philippines', 'Singapore', 'Thailand']
+    
+    etl_web_to_gcs(indicators=indicators, countries=countries, lastXYears=10)
     
     
 
