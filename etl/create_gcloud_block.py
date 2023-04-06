@@ -5,6 +5,11 @@ from prefect import flow
 
 @flow()
 def create_blocks():
+    """ 
+    This creates our blocks in prefect. 
+    Blocks help us authenticate with gcp just by using our gcp credentials
+    """
+    
     with open('secrets/de-proj.json') as f, open('config.json') as c:
         secret = json.load(f)
         config = json.load(c)

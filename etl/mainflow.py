@@ -6,6 +6,13 @@ from prefect import flow
 
 @flow()
 def mainflow(indicators:list[str], countries:list[str], lastXYears:int):
+    """ main entry point of the data pipeline
+
+    Args:
+        indicators (list[str]): world indicators to analyse as stated here - https://datacatalog.worldbank.org/search/dataset/0037712/World-Development-Indicators
+        countries (list[str]): list of countires to compare
+        lastXYears (int): how many years since 2020. example: 10 years would return 2011 - 2020 data
+    """
     create_blocks()
     etl_web_to_gcs(indicators=indicators, countries=countries, lastXYears=lastXYears)
     etl_gcs_to_bq()

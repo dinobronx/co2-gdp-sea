@@ -9,6 +9,7 @@ from prefect_gcp import GcpCredentials
 
 @task()
 def extract_from_gcs() -> Path:
+    """ Extract raw data from gcs """
     gcs_block = GcsBucket.load('econ-bucket-creds')
     gcs_path = 'de-zoomcamp/economic-analysis.parquet'
     gcs_block.get_directory(from_path=gcs_path)
@@ -76,7 +77,7 @@ def write_bq(df: pd.DataFrame) -> None:
         config = json.load(c)
         df.to_gbq(
             destination_table=f'{config["bq_dataset"]}.rawdata',
-            project_id='alien-handler-376020',
+            project_id=config["project_id"],
             credentials=gcp_credentials.get_credentials_from_service_account(),
             chunksize=500_000,
             if_exists="replace",
